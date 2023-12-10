@@ -1,0 +1,49 @@
+{
+  "project_info": {
+    "project_number": "835981496272",
+    "firebase_url": "https://tanhxbanking-default-rtdb.firebaseio.com",
+    "project_id": "tanhxbanking",
+    "storage_bucket": "tanhxbanking.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:835981496272:android:b02cbde68b70d0d6b773d5",
+        "android_client_info": {
+          "package_name": "com.example.banking"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDr3NFNHRw4o2wtsI1XT4PNvPdKbxqdXMc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:835981496272:android:98fb23c0da472bbcb773d5",
+        "android_client_info": {
+          "package_name": "com.example.nestedrecyclerview_image_firebase"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDr3NFNHRw4o2wtsI1XT4PNvPdKbxqdXMc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
