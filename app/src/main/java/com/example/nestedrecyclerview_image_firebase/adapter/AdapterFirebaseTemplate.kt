@@ -13,6 +13,7 @@ import com.example.nestedrecyclerview_image_firebase.model.FirebaseTemplate
 
 class AdapterFirebaseTemplate(var context: Context,var firebaseTemplate: List<FirebaseTemplate>) :
     RecyclerView.Adapter<AdapterFirebaseTemplate.firebaseViewholder>() {
+    private var categoryName : CategoryName? = null
     inner class firebaseViewholder(itemView : View) : RecyclerView.ViewHolder(itemView){
         val categoryName : TextView = itemView.findViewById(R.id.categoryName)
         var imageTemplateRcv : RecyclerView = itemView.findViewById(R.id.rcv_firebasetemplate)
@@ -31,7 +32,8 @@ class AdapterFirebaseTemplate(var context: Context,var firebaseTemplate: List<Fi
     override fun onBindViewHolder(holder: firebaseViewholder, position: Int) {
         var currentItem = firebaseTemplate[position]
         holder.categoryName.text = currentItem.categoryName
-        holder.imageTemplateRcv.adapter = AdapterImageTemplate(context, currentItem.mlist, object: OnChildListSelected{
+        categoryName?.getCategoryName(currentItem.categoryName)
+        holder.imageTemplateRcv.adapter = AdapterImageTemplate(context, currentItem.listImageTemplate, object: OnChildListSelected{
             override fun selected(position: Int, adapter: AdapterImageTemplate) {
                 if (childAdapterSelected != null) {
                     childAdapterSelected?.unSelectedItem()
@@ -49,4 +51,7 @@ class AdapterFirebaseTemplate(var context: Context,var firebaseTemplate: List<Fi
 }
 interface OnChildListSelected {
    fun selected(position: Int, adapter: AdapterImageTemplate)
+}
+interface CategoryName{
+    fun getCategoryName(category  :String)
 }

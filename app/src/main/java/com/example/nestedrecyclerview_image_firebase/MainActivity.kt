@@ -27,10 +27,13 @@ import com.google.firebase.storage.FirebaseStorage
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import java.io.File
-
+var storageBasePath = "/Firebase_template/"
 class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
     private lateinit var imagePaths: List<String>
+    var checkJson = false
+    private val categoryLists = mutableMapOf<String, ArrayList<ImageTemplate>>()
+    private val categoryListsProduct = mutableMapOf<String, ArrayList<ImageTemplate>>()
 
 
 
@@ -42,13 +45,19 @@ class MainActivity : AppCompatActivity() {
 
 
 
-
-
         RxBus.listen(imagePath::class.java)
             .subscribe { imagePath ->
-                Glide.with(this)
-                    .load(imagePath.path)
-                    .into(binding.img)
+                Log.d("huhu", "onCreate: ${imagePath.path}")
+                val storageRef = FirebaseStorage.getInstance().getReference().child(imagePath.path)
+
+        storageRef.downloadUrl.addOnSuccessListener { uri ->
+            val imageUrl = uri.toString()
+
+            Glide.with(this)
+                .load(imageUrl)
+                .into(binding.img)
+        }
+
             }
 
 
@@ -57,7 +66,8 @@ class MainActivity : AppCompatActivity() {
 
 
         binding.rcv.layoutManager = LinearLayoutManager(this)
-        getListImage()
+        getListImageDEV()
+        getListImageProduct()
         // get img device
         var listImg = loadAllPhoto(this)
         imagePaths = listImg.map { it.pathImage }
@@ -65,53 +75,88 @@ class MainActivity : AppCompatActivity() {
 
     }
 
-    private fun getListImage() {
+    private fun getListImageProduct() {
         val stoimg = FirebaseStorage.getInstance()
         val categories = listOf("category1")
 
-        val categoryLists = mutableMapOf<String, ArrayList<ImageTemplate>>()
 
         categories.forEach { category ->
-            val storageRef = stoimg.reference.child("Firebase_template").child(category)
+            val storageRef = stoimg.reference.child("Product").child("Template").child(category)
+            storageRef.listAll().addOnSuccessListener { result ->
+                val categoryImageListProdcut = ArrayList<ImageTemplate>()
+
+                result.items.forEach { item ->
+                    val imgName = item.name
+                    val path = item.path
+                    Log.d("huhu", "getListImage: $imgName")
+
+                    categoryImageListProdcut.add(ImageTemplate(path, 0))
+                }
+
+                categoryListsProduct[category] = categoryImageListProdcut
+                bindDataToRecyclerView(categoryLists, categoryListsProduct)
+            }
+        }
+    }
+    private fun getListImageDEV() {
+        val stoimg = FirebaseStorage.getInstance()
+        val categories = listOf("category1")
+
+
+
+        categories.forEach { category ->
+            val storageRef = stoimg.reference.child("Dev").child("Template").child(category)
             storageRef.listAll().addOnSuccessListener { result ->
                 val categoryImageList = ArrayList<ImageTemplate>()
 
                 result.items.forEach { item ->
-                    val downloadTask = item.downloadUrl
                     val imgName = item.name
                     val path = item.path
-                    Log.d("huhu", "getListImage: ${path}")
-                    downloadTask.addOnSuccessListener { uri ->
-                        val imgUri = uri.toString()
-                        categoryImageList.add(ImageTemplate(imgUri, 0))
-                        categoryLists[category] = categoryImageList
-                        bindDataToRecyclerView(categoryLists)
-                    }
+                    Log.d("huhu", "getListImage: $imgName")
+
+                    categoryImageList.add(ImageTemplate(path, 0))
                 }
+
+                categoryLists[category] = categoryImageList
+                bindDataToRecyclerView(categoryLists, categoryListsProduct)
+            }
+        }
+    }
+
+    private fun bindDataToRecyclerView(
+        categoryListsDev: Map<String, ArrayList<ImageTemplate>>,
+        categoryListsProduct: Map<String, ArrayList<ImageTemplate>>
+    ) {
+        val combinedList = mutableListOf<FirebaseTemplate>()
+        categoryListsDev.forEach { (category, imageList) ->
+            combinedList.add(FirebaseTemplate(category, false, 0, imageList))
+        }
+
+        val combinedListProduct = mutableListOf<FirebaseTemplate>()
+        Log.d("huhu", "category: ${categoryListsDev}")
+        categoryListsProduct.forEach { (category, imageList) ->
+            combinedListProduct.add(FirebaseTemplate(category, false, 0, imageList))
+        }
+
+        binding.progress.visibility = View.GONE
+        val json = convertListToJson(combinedList)
+        val json1 = convertListToJson(combinedListProduct)
+
+        binding.img.setOnClickListener {
+/*
+            Log.d("huhu", "bindDataToRecyclerView: ${json1}")
+            Log.d("huhu", "bindDataToRecyclerView: ${combinedListProduct}")
+*/
+            if(!checkJson){
+                Log.d("json", "JSON DEV : $json")
+                checkJson = true
+            } else {
+                Log.d("json", "JSON PRODUCT : $json1")
+                checkJson = false
             }
         }
 
-
-    }
-
-    private fun bindDataToRecyclerView(categoryLists: Map<String, ArrayList<ImageTemplate>>) {
-        /*val combinedList = categoryLists.map { (category, imageList) ->
-            FirebaseTemplate(category, false, imageList)
-        }.toMutableList()*/
-        val combinedList = mutableListOf<FirebaseTemplate>()
-        categoryLists.forEach { (category, imageList) ->
-            combinedList.add(FirebaseTemplate("Ảnh từ Firebase", false, imageList))
-            combinedList.add(FirebaseTemplate("Ảnh từ Firebase1", false, imageList))
-            combinedList.add(FirebaseTemplate("Ảnh từ Firebase2", false, imageList))
-        }
-
-        combinedList.add(FirebaseTemplate("Ảnh từ thiết bị", false, imagePaths.map { ImageTemplate(it, 0) }))
-
-
-        binding.progress.visibility = View.GONE
-        val json = convertListToJson(combinedList) // object -> json
-        var listFirebase = convertJsonToFirebaseTemplateList(json) // json -> object
-
+        var listFirebase = convertJsonToFirebaseTemplateList(json)
         binding.rcv.adapter = AdapterFirebaseTemplate(this, listFirebase)
     }
 

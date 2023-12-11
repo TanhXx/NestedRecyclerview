@@ -11,14 +11,18 @@ import android.widget.ImageView
 import android.widget.LinearLayout
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
+import com.example.nestedrecyclerview_image_firebase.MainActivity
 import com.example.nestedrecyclerview_image_firebase.R
 import com.example.nestedrecyclerview_image_firebase.RxBus
 import com.example.nestedrecyclerview_image_firebase.model.ImageTemplate
 import com.example.nestedrecyclerview_image_firebase.model.imagePath
+import com.example.nestedrecyclerview_image_firebase.storageBasePath
+import com.google.firebase.storage.FirebaseStorage
 
 class AdapterImageTemplate(var context : Context, var imageList: List<ImageTemplate>, var callBack: OnChildListSelected) :
-    RecyclerView.Adapter<AdapterImageTemplate.imageViewholder>() {
+    RecyclerView.Adapter<AdapterImageTemplate.imageViewholder>(),CategoryName {
     private var selectedPosition = -1
+    private lateinit var nameCategory : String
 
     inner class imageViewholder(itemView : View) : RecyclerView.ViewHolder(itemView){
         var imgFirebase: ImageView = itemView.findViewById(R.id.Imageview)
@@ -35,9 +39,19 @@ class AdapterImageTemplate(var context : Context, var imageList: List<ImageTempl
     }
 
     override fun onBindViewHolder(holder: imageViewholder, @SuppressLint("RecyclerView") position: Int) {
-        Glide.with(context)
+        /*Glide.with(context)
             .load(imageList[position].imagePath)
-            .into(holder.imgFirebase)
+            .into(holder.imgFirebase)*/
+        val storageRef = FirebaseStorage.getInstance().getReference().
+            child(imageList[position].imagePath)
+
+        storageRef.downloadUrl.addOnSuccessListener { uri ->
+            val imageUrl = uri.toString()
+
+            Glide.with(context)
+                .load(imageUrl)
+                .into(holder.imgFirebase)
+        }
 
         if (selectedPosition == position) {
             holder.layout.setBackgroundResource(R.drawable.bg_itemclick)
@@ -56,5 +70,10 @@ class AdapterImageTemplate(var context : Context, var imageList: List<ImageTempl
     fun unSelectedItem() {
         selectedPosition = -1
         notifyDataSetChanged()
+    }
+
+    override fun getCategoryName(category: String) {
+        nameCategory = category
+
     }
 }
