@@ -27,7 +27,9 @@ import com.google.firebase.storage.FirebaseStorage
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import java.io.File
-var storageBasePath = "/Firebase_template/"
+import java.io.FileOutputStream
+import java.io.IOException
+
 class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
     private lateinit var imagePaths: List<String>
@@ -42,7 +44,6 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
-
 
 
         RxBus.listen(imagePath::class.java)
@@ -100,28 +101,39 @@ class MainActivity : AppCompatActivity() {
     }
     private fun getListImageDEV() {
         val stoimg = FirebaseStorage.getInstance()
-        val categories = listOf("category1")
+        val storageRef = stoimg.reference.child("Dev").child("Template")
 
+        storageRef.listAll().addOnSuccessListener { result ->
+            val categoryLists = mutableMapOf<String, ArrayList<ImageTemplate>>()
 
+            result.prefixes.forEach { folderRef ->
+                val folderName = folderRef.name // Lấy tên của thư mục con
 
-        categories.forEach { category ->
-            val storageRef = stoimg.reference.child("Dev").child("Template").child(category)
-            storageRef.listAll().addOnSuccessListener { result ->
-                val categoryImageList = ArrayList<ImageTemplate>()
+                // Lấy danh sách các items trong thư mục con
+                folderRef.listAll().addOnSuccessListener { folderResult ->
+                    val categoryImageList = ArrayList<ImageTemplate>()
 
-                result.items.forEach { item ->
-                    val imgName = item.name
-                    val path = item.path
-                    Log.d("huhu", "getListImage: $imgName")
+                    folderResult.items.forEach { item ->
+                        val imgName = item.name
+                        val path = item.path
+                        Log.d("huhu", "getListImage: $imgName")
 
-                    categoryImageList.add(ImageTemplate(path, 0))
+                        val imageType = if (imgName.endsWith("_sub.jpg")) 1 else 0
+                        categoryImageList.add(ImageTemplate(path, imageType))
+                    }
+
+                    categoryLists[folderName] = categoryImageList
+                    bindDataToRecyclerView(categoryLists,categoryListsProduct)
+                }.addOnFailureListener { exception ->
+                    Log.e("getListImageDEV", "Error getting items in folder $folderName: ${exception.message}")
                 }
-
-                categoryLists[category] = categoryImageList
-                bindDataToRecyclerView(categoryLists, categoryListsProduct)
             }
+        }.addOnFailureListener { exception ->
+            Log.e("getListImageDEV", "Error getting folders: ${exception.message}")
         }
     }
+
+
 
     private fun bindDataToRecyclerView(
         categoryListsDev: Map<String, ArrayList<ImageTemplate>>,
@@ -140,6 +152,8 @@ class MainActivity : AppCompatActivity() {
 
         binding.progress.visibility = View.GONE
         val json = convertListToJson(combinedList)
+        saveStringToFile(json,"TanhX.json")
+        Log.d("json", "bindDataToRecyclerView: ${json}")
         val json1 = convertListToJson(combinedListProduct)
 
         binding.img.setOnClickListener {
@@ -158,6 +172,18 @@ class MainActivity : AppCompatActivity() {
 
         var listFirebase = convertJsonToFirebaseTemplateList(json)
         binding.rcv.adapter = AdapterFirebaseTemplate(this, listFirebase)
+    }
+    private fun saveStringToFile(content: String, fileName: String) {
+        val file = File(this.filesDir, fileName)
+
+        try {
+            val outputStream = FileOutputStream(file)
+            outputStream.write(content.toByteArray())
+            outputStream.close()
+            Log.d("FileSaved", "File $fileName saved successfully.")
+        } catch (e: IOException) {
+            Log.e("FileSaveError", "Error saving file: ${e.message}")
+        }
     }
 
     fun convertListToJson(combinedList: List<FirebaseTemplate>): String {

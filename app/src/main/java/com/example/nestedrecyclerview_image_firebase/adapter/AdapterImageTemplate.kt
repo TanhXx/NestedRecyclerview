@@ -16,7 +16,7 @@ import com.example.nestedrecyclerview_image_firebase.R
 import com.example.nestedrecyclerview_image_firebase.RxBus
 import com.example.nestedrecyclerview_image_firebase.model.ImageTemplate
 import com.example.nestedrecyclerview_image_firebase.model.imagePath
-import com.example.nestedrecyclerview_image_firebase.storageBasePath
+
 import com.google.firebase.storage.FirebaseStorage
 
 class AdapterImageTemplate(var context : Context, var imageList: List<ImageTemplate>, var callBack: OnChildListSelected) :
