@@ -40,8 +40,7 @@ class MainActivity : AppCompatActivity() {
     private var jsonString: String? = null
     private var TAG = "MainActivity"
     private var listFirebasecv: List<FirebaseTemplate>? = null
-
-
+    private val parentList = ArrayList<FirebaseTemplate>()
 
     @SuppressLint("MissingInflatedId", "CheckResult")
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -66,16 +65,46 @@ class MainActivity : AppCompatActivity() {
             }
 
 
-
-
-
-
         binding.rcv.layoutManager = LinearLayoutManager(this)
         getListImageDEV()
         getListImageProduct()
         // get img device
         var listImg = loadAllPhoto(this)
         imagePaths = listImg.map { it.pathImage }
+
+        val parentList = ArrayList<FirebaseTemplate>()
+
+        for (i in 1..30) {
+            val childItems = ArrayList<ImageTemplate>()
+            childItems.add(ImageTemplate(R.drawable.c, 0))
+            childItems.add(ImageTemplate(R.drawable.csharp, 0))
+            childItems.add(ImageTemplate(R.drawable.java, 0))
+            childItems.add(ImageTemplate(R.drawable.cplusplus, 0))
+            childItems.add(ImageTemplate(R.drawable.c, 0))
+            childItems.add(ImageTemplate(R.drawable.csharp, 0))
+            childItems.add(ImageTemplate(R.drawable.java, 0))
+            childItems.add(ImageTemplate(R.drawable.cplusplus, 0))
+            childItems.add(ImageTemplate(R.drawable.c, 0))
+            childItems.add(ImageTemplate(R.drawable.csharp, 0))
+            childItems.add(ImageTemplate(R.drawable.java, 0))
+            childItems.add(ImageTemplate(R.drawable.cplusplus, 0))
+            childItems.add(ImageTemplate(R.drawable.c, 0))
+            childItems.add(ImageTemplate(R.drawable.csharp, 0))
+            childItems.add(ImageTemplate(R.drawable.java, 0))
+            childItems.add(ImageTemplate(R.drawable.cplusplus, 0))
+            childItems.add(ImageTemplate(R.drawable.c, 0))
+            childItems.add(ImageTemplate(R.drawable.csharp, 0))
+            childItems.add(ImageTemplate(R.drawable.java, 0))
+            childItems.add(ImageTemplate(R.drawable.cplusplus, 0))
+
+
+            parentList.add(FirebaseTemplate("Game Development $i", false, R.drawable.console, childItems))
+        }
+
+        binding.rcv.adapter = AdapterFirebaseTemplate(this, parentList)
+
+
+
 
 
     }
@@ -95,7 +124,7 @@ class MainActivity : AppCompatActivity() {
                     val path = item.path
                     Log.d("huhu", "getListImage: $imgName")
 
-                    categoryImageListProdcut.add(ImageTemplate(path, 0))
+                 /*   categoryImageListProdcut.add(ImageTemplate(path, 0))*/
                 }
 
                 categoryListsProduct[category] = categoryImageListProdcut
@@ -123,7 +152,7 @@ class MainActivity : AppCompatActivity() {
                         Log.d("huhu", "getListImage: $imgName")
 
                         val imageType = if (imgName.endsWith("_sub.jpg")) 1 else 0
-                        categoryImageList.add(ImageTemplate(path, imageType))
+                       /* categoryImageList.add(ImageTemplate(path, imageType))*/
                     }
 
                     categoryLists[folderName] = categoryImageList
@@ -175,9 +204,10 @@ class MainActivity : AppCompatActivity() {
         }
 
         var listFirebase = convertJsonToFirebaseTemplateList(json)
-       if(listFirebasecv!= null){
+       /*if(listFirebasecv!= null){
+
            binding.rcv.adapter = AdapterFirebaseTemplate(this, listFirebasecv!!)
-       }
+       }*/
     }
     private fun readStringFromFile(fileName: String): String? {
         val file = File(this.filesDir, fileName)

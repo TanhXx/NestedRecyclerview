@@ -11,6 +11,7 @@ import android.widget.ImageView
 import android.widget.LinearLayout
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
+import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.example.nestedrecyclerview_image_firebase.MainActivity
 import com.example.nestedrecyclerview_image_firebase.R
 import com.example.nestedrecyclerview_image_firebase.RxBus
@@ -41,16 +42,15 @@ class AdapterImageTemplate(var context : Context, var imageList: List<ImageTempl
 
     override fun onBindViewHolder(holder: imageViewholder, @SuppressLint("RecyclerView") position: Int) {
         Log.d(TAG, "onBindViewHolder: Adapter con")
-        val storageRef = FirebaseStorage.getInstance().getReference().
+        /*val storageRef = FirebaseStorage.getInstance().getReference().
             child(imageList[position].imagePath)
-
         storageRef.downloadUrl.addOnSuccessListener { uri ->
             val imageUrl = uri.toString()
-
+            Log.d(TAG, "onBindViewHolder: ${imageUrl}")*/
             Glide.with(context)
-                .load(imageUrl)
+                .load(imageList[position].imagePath).diskCacheStrategy(DiskCacheStrategy.DATA).override(200,200).skipMemoryCache(true)
                 .into(holder.imgFirebase)
-        }
+     /*   }*/
 
         if (selectedPosition == position) {
             holder.layout.setBackgroundResource(R.drawable.bg_itemclick)
@@ -58,13 +58,10 @@ class AdapterImageTemplate(var context : Context, var imageList: List<ImageTempl
             holder.layout.setBackgroundResource(R.color.white)
         }
 
-        holder.imgFirebase.setOnClickListener {
-           /* callBack.selected(position, this)*/
+        /*holder.imgFirebase.setOnClickListener {
             RxBus.publish(imagePath(imageList[position].imagePath))
             selectedPosition = position
-           /* notifyItemChanged(position)*/
-
-        }
+        }*/
 
     }
 
