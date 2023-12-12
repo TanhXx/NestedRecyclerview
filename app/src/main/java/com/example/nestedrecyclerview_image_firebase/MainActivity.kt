@@ -27,6 +27,7 @@ import com.google.firebase.storage.FirebaseStorage
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import java.io.File
+import java.io.FileInputStream
 import java.io.FileOutputStream
 import java.io.IOException
 
@@ -36,6 +37,9 @@ class MainActivity : AppCompatActivity() {
     var checkJson = false
     private val categoryLists = mutableMapOf<String, ArrayList<ImageTemplate>>()
     private val categoryListsProduct = mutableMapOf<String, ArrayList<ImageTemplate>>()
+    private var jsonString: String? = null
+    private var TAG = "MainActivity"
+    private var listFirebasecv: List<FirebaseTemplate>? = null
 
 
 
@@ -171,7 +175,21 @@ class MainActivity : AppCompatActivity() {
         }
 
         var listFirebase = convertJsonToFirebaseTemplateList(json)
-        binding.rcv.adapter = AdapterFirebaseTemplate(this, listFirebase)
+       if(listFirebasecv!= null){
+           binding.rcv.adapter = AdapterFirebaseTemplate(this, listFirebasecv!!)
+       }
+    }
+    private fun readStringFromFile(fileName: String): String? {
+        val file = File(this.filesDir, fileName)
+        return try {
+            val inputStream = FileInputStream(file)
+            val inputString = inputStream.bufferedReader().use { it.readText() }
+            inputStream.close()
+            inputString
+        } catch (e: IOException) {
+            Log.e("FileReadError", "Error reading file: ${e.message}")
+            null
+        }
     }
     private fun saveStringToFile(content: String, fileName: String) {
         val file = File(this.filesDir, fileName)
@@ -180,10 +198,16 @@ class MainActivity : AppCompatActivity() {
             val outputStream = FileOutputStream(file)
             outputStream.write(content.toByteArray())
             outputStream.close()
-            Log.d("FileSaved", "File $fileName saved successfully.")
+            jsonString = readStringFromFile("TanhX.json")
+         /*   Log.d(TAG, "saveStringToFile: ${jsonString}")*/
+            val gson = Gson()
+            listFirebasecv= gson.fromJson(jsonString, object : TypeToken<List<FirebaseTemplate>>() {}.type)
+            Log.d(TAG, "saveStringToFile: ${listFirebasecv}")
+
         } catch (e: IOException) {
             Log.e("FileSaveError", "Error saving file: ${e.message}")
         }
+
     }
 
     fun convertListToJson(combinedList: List<FirebaseTemplate>): String {

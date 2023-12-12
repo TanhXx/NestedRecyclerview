@@ -23,6 +23,7 @@ class AdapterImageTemplate(var context : Context, var imageList: List<ImageTempl
     RecyclerView.Adapter<AdapterImageTemplate.imageViewholder>(),CategoryName {
     private var selectedPosition = -1
     private lateinit var nameCategory : String
+    var TAG = "AdapterImageTemplate"
 
     inner class imageViewholder(itemView : View) : RecyclerView.ViewHolder(itemView){
         var imgFirebase: ImageView = itemView.findViewById(R.id.Imageview)
@@ -39,9 +40,7 @@ class AdapterImageTemplate(var context : Context, var imageList: List<ImageTempl
     }
 
     override fun onBindViewHolder(holder: imageViewholder, @SuppressLint("RecyclerView") position: Int) {
-        /*Glide.with(context)
-            .load(imageList[position].imagePath)
-            .into(holder.imgFirebase)*/
+        Log.d(TAG, "onBindViewHolder: Adapter con")
         val storageRef = FirebaseStorage.getInstance().getReference().
             child(imageList[position].imagePath)
 
@@ -60,11 +59,13 @@ class AdapterImageTemplate(var context : Context, var imageList: List<ImageTempl
         }
 
         holder.imgFirebase.setOnClickListener {
-            callBack.selected(position, this)
+           /* callBack.selected(position, this)*/
             RxBus.publish(imagePath(imageList[position].imagePath))
             selectedPosition = position
-            notifyDataSetChanged()
+           /* notifyItemChanged(position)*/
+
         }
+
     }
 
     fun unSelectedItem() {
